@@ -4,7 +4,7 @@
 # comboNChooseKRecursive(cList, n, k, buildList, buildIndex, parentIndex, childIndex, comboList)
 
 
-cList <- c(1, 2, 3, 4)
+cList <- c(1, 2, 3, 4, 5)
 n <- length(cList)
 k <- 3
 buildList <- vector(mode="integer", length=k)
@@ -24,14 +24,22 @@ comboNChooseKRecursive <- function(cList, n, k, buildList, buildIndex, parentInd
     cLength = length(comboList) + 1
     comboList[[cLength]] <- buildList
     parentIndex = parentIndex + 1
+    
+    buildIndex <- 0
+    childIndex <- 0
+    print(buildList)
+    print(paste('call1 ', buildIndex, ' ', parentIndex, ' ', childIndex))
     comboNChooseKRecursive(cList, n, k, buildList, buildIndex, parentIndex, childIndex, comboList)
   }
   else {
     buildList[buildIndex] = cList[childIndex]
-    # print(buildList)
+    print(buildList)
+    print(paste('call2 ', buildIndex, ' ', parentIndex, ' ', childIndex))
     comboNChooseKRecursive(cList, n, k, buildList, buildIndex, parentIndex, childIndex, comboList)
   }
 }
 
-comboNChooseKRecursive(cList, n, k, buildList, buildIndex, parentIndex, childIndex, comboList)
+x <- comboNChooseKRecursive(cList, n, k, buildList, buildIndex, parentIndex, childIndex, comboList)
 
+#print('combo')
+# print(x)
