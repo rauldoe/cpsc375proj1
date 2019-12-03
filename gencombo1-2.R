@@ -59,8 +59,20 @@ comboNChooseKAll <- function(inputList) {
   return (comboListAll)
 }
 
-inList <- c(1, 2, 3, 4, 5)
+genFuncCall <- function(inputList, funcCall) {
+  return (lapply(1:3, function(i) paste(funcCall, "(", i, ")", sep = '', collapse = ' ')))
+}
 
-comboLista <- comboNChooseKAll(inList)
+genPostscriptOpCall <- function(inputList, postscriptOp) {
+  return (lapply(1:3, function(i) paste(i, postscriptOp, sep = '', collapse = ' ')))
+}
 
-print(comboLista)
+inList <- c("1", "2", "3")
+
+genFuncCall(inList, "log")
+genPostscriptOpCall(inList, "^2")
+
+
+# comboLista <- comboNChooseKAll(inList)
+
+# print(comboLista)
