@@ -1,5 +1,4 @@
 
-
 # comboNChooseK(cList, n, k)
 # comboNChooseKRecursive(cList, n, k, buildList, buildIndex, start, end, comboList)
 
@@ -14,38 +13,45 @@ end <- n
 comboList <- list()
 
 comboNChooseKRecursive <- function(cList, n, k, buildList, buildIndex, start, end, comboList) {
-  
+
   if (buildIndex > k) {
 
   	cLength <- length(comboList) + 1
-  	# print(paste("before", length(gComboList)))
   	comboList[[cLength]] <- buildList
-  	# print(paste("after", length(gComboList)))
 
-  	print("build")
+  	print(paste("add to comboList"))
   	print(buildList)
-  	return (comboList)	  
+  	# return (comboList)	  
   }
   else {
-
+  
     i <- start
-    while ((i <= end) && (end - buildIndex <= buildIndex - i)) {   
+    keepGoing <- TRUE
+    while (keepGoing) {   
     	
-    	buildList[buildIndex] <- cList[i]
+      newI <- i + 1
+      newBuildIndex <- buildIndex + 1
+      
+      buildList[buildIndex] <- cList[i]
     
-    	newI <- i + 1
-    	newBuildIndex <- buildIndex + 1
-    
-    	print(paste("buildIndex:", buildIndex, "i:", i, "end:", end, sep= " "))
+      # print("newI <- i + 1; newBuildIndex <- buildIndex + 1;")
+    	print(paste("recurse buildIndex:", buildIndex, "i:", i, "end:", end, "newBuildIndex:", newBuildIndex, "newI:", newI, sep= " "))
     	print(buildList)
     	comboList <- comboNChooseKRecursive(cList, n, k, buildList, newBuildIndex, newI, end, comboList)
-    	# print("main")
-    	# print(comboList)
+    	print(paste("return from recurse comboList"))
     	
     	i <- i + 1
-    	
-    	if (i>end)
+
+    	if (i > end) {
+    	  print("i > end")
+    	  keepGoing <- FALSE
     	  break
+    	}
+    	else if (n-i+1 < k-buildIndex+1) {
+    	  print("n-i+1 < k-buildIndex+1")
+    	  keepGoing <- FALSE
+    	  break
+    	}
     }
     # while ((buildIndex <= k) && (i <= end) ) {
   }
@@ -56,8 +62,5 @@ comboNChooseKRecursive <- function(cList, n, k, buildList, buildIndex, start, en
 
 comboList <- comboNChooseKRecursive(cList, n, k, buildList, buildIndex, start, end, comboList)
 
-
-
 print('combo')
-
 print(comboList)
