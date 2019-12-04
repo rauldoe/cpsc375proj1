@@ -358,7 +358,19 @@ comboNChooseKAllv2 <- function(inputList, k, chunkSize, workDir, filename, ext) 
   
 }
 
-comboNChooseKRecursiveV3 <- function(inputList, n, k, buildList, buildIndex, start, end, comboList, processComboListFunc) {
+# pclInfo<- list(workDir, filename, 0, ext)
+# names(pclInfo) <- c("workDir", "filename", "fileIndex", "ext")
+# workDir <- pclInfo[["workDir"]]
+# processComboListFunc(inputList, n, k, buildList, buildIndex, start, end, comboList)
+
+processComboListFunc <- function(inputList, n, k, buildList, buildIndex, start, end, comboList) {
+
+  
+
+  return (comboList)
+}
+
+comboNChooseKRecursiveV3 <- function(inputList, n, k, buildList, buildIndex, start, end, comboList, processComboListFunc, pclInfo) {
   
   if (buildIndex > k) {
     
@@ -378,7 +390,7 @@ comboNChooseKRecursiveV3 <- function(inputList, n, k, buildList, buildIndex, sta
       newBuildIndex <- buildIndex + 1
       
       # print(paste("recurse buildIndex:", buildIndex, "i:", i, "end:", end, "newBuildIndex:", newBuildIndex, "newIndex:", newIndex, "b:", paste(buildList, collapse=","), sep= " "))
-      comboList <- comboNChooseKRecursiveV3S(inputList, n, k, buildList, newBuildIndex, newIndex, end, comboList, processComboListFunc)
+      comboList <- comboNChooseKRecursiveV3S(inputList, n, k, buildList, newBuildIndex, newIndex, end, comboList, processComboListFunc, pclInfo)
       # print(paste("return from recurse comboList buildIndex:", buildIndex, "i:", i, "end:", end, "newBuildIndex:", newBuildIndex, "newIndex:", newIndex, sep= " "))
       
       i <- i + 1
@@ -391,19 +403,19 @@ comboNChooseKRecursiveV3 <- function(inputList, n, k, buildList, buildIndex, sta
   return (comboList)
 }
 
-comboNChooseKv3 <- function(inputList, k, processComboListFunc) {
+comboNChooseKv3 <- function(inputList, k, processComboListFunc, pclInfo) {
   n <- length(inputList)
   buildList <- vector(length = k)
   buildIndex1 <- 1
   start <- 1
   end <- n
   comboList <- list()
-  comboList <- comboNChooseKRecursiveV3(inputList, n, k, buildList, buildIndex1, start, end, comboList)
+  comboList <- comboNChooseKRecursiveV3(inputList, n, k, buildList, buildIndex1, start, end, comboList, processComboListFunc, pclInfo)
   
   return (comboList)
 }
 
-comboNChooseKAllv3 <- function(inputList, k, processComboListFunc) {
+comboNChooseKAllv3 <- function(inputList, k, processComboListFunc, pclInfo) {
   
   comboListAll <- list()
   iLength <- length(inputList)
@@ -416,7 +428,7 @@ comboNChooseKAllv3 <- function(inputList, k, processComboListFunc) {
   i <- 1
   while (i<=k) {   
     
-    comboList <- comboNChooseK(inputList, i)
+    comboList <- comboNChooseKV3(inputList, i, processComboListFunc, pclInfo)
     comboListAll <- do.call(c, list(comboListAll, comboList))
     comboList <- list()
 
