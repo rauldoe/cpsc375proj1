@@ -100,7 +100,7 @@ ggplotFunc <- function(aesFunc, labelX, labelY, title) {
 # sum$r.squared
 # sum$adj.r.squared
 
-buildExploreList <- function(exploreList, bfFormula) {
+buildExploreList <- function(data, exploreList, bfFormula) {
   lmData <- lm(data = data, formula = bfFormula)
   sum <- summary(lmData)
   nextIndex <- length(exploreList) + 1
@@ -160,11 +160,11 @@ buildInPostscriptOps <- function(allIVars, iVars, postscriptOpNameList){
   return (allIVars)
 }
 
-compileExploreListWithComboList <- function(exploreList, comboList, dependentAttrib) {
+compileExploreListWithComboList <- function(data, exploreList, comboList, dependentAttrib) {
   for (combo in comboList) {
     
     bf <- getBfFormula(dependentAttrib, combo)
-    exploreList <- buildExploreList(exploreList, bf)
+    exploreList <- buildExploreList(data, exploreList, bf)
   }
   
   return (exploreList)
@@ -335,11 +335,94 @@ comboNChooseKAllv2 <- function(inputList, k, chunkSize, workDir, filename, ext) 
     
     comboList <- comboNChooseK(inputList, i)
     comboListAll <- do.call(c, list(comboListAll, comboList))
-    
+    comboList <- list()
+
     if (length(comboListAll) >= chunkSize) {
       
       writeListToFile(comboListAll, workDir, filename, fileIndex, ext)
+      comboListAll <- list()
       
+      fileIndex <- fileIndex + 1
+    }
+    i <- i + 1
+  }
+  
+  if (length(comboListAll) > 0) {
+    
+    writeListToFile(comboListAll, workDir, filename, fileIndex, ext)
+    
+    comboListAll <- list()
+    
+    fileIndex <- fileIndex + 1
+  }
+  
+}
+
+comboNChooseKRecursiveV3 <- function(inputList, n, k, buildList, buildIndex, start, end, comboList, processComboListFunc) {
+  
+  if (buildIndex > k) {
+    
+    cLength <- length(comboList) + 1
+    comboList[[cLength]] <- buildList
+    # print(paste("add to comboList", paste(buildList, collapse=","), sep = " "))
+    comboList <- processComboListFunc(inputList, n, k, buildList, buildIndex, start, end, comboList)
+  }
+  else {
+    
+    i <- start
+    while ((i <= end) &&  (n-i+1 >= k-buildIndex+1)) {   
+      
+      buildList[buildIndex] <- inputList[i]
+      
+      newIndex <- i + 1
+      newBuildIndex <- buildIndex + 1
+      
+      # print(paste("recurse buildIndex:", buildIndex, "i:", i, "end:", end, "newBuildIndex:", newBuildIndex, "newIndex:", newIndex, "b:", paste(buildList, collapse=","), sep= " "))
+      comboList <- comboNChooseKRecursiveV3S(inputList, n, k, buildList, newBuildIndex, newIndex, end, comboList, processComboListFunc)
+      # print(paste("return from recurse comboList buildIndex:", buildIndex, "i:", i, "end:", end, "newBuildIndex:", newBuildIndex, "newIndex:", newIndex, sep= " "))
+      
+      i <- i + 1
+      
+    }
+    # while ((i <= end) &&  (n-i+1 >= k-buildIndex+1)) {
+  }
+  # if (buildIndex > k) {
+  
+  return (comboList)
+}
+
+comboNChooseKv3 <- function(inputList, k, processComboListFunc) {
+  n <- length(inputList)
+  buildList <- vector(length = k)
+  buildIndex1 <- 1
+  start <- 1
+  end <- n
+  comboList <- list()
+  comboList <- comboNChooseKRecursiveV3(inputList, n, k, buildList, buildIndex1, start, end, comboList)
+  
+  return (comboList)
+}
+
+comboNChooseKAllv3 <- function(inputList, k, processComboListFunc) {
+  
+  comboListAll <- list()
+  iLength <- length(inputList)
+  
+  if (k <= 0) {
+    k = iLength
+  }
+  
+  fileIndex <- 0
+  i <- 1
+  while (i<=k) {   
+    
+    comboList <- comboNChooseK(inputList, i)
+    comboListAll <- do.call(c, list(comboListAll, comboList))
+    comboList <- list()
+
+    if (length(comboListAll) >= chunkSize) {
+      
+      writeListToFile(comboListAll, workDir, filename, fileIndex, ext)
       comboListAll <- list()
       
       fileIndex <- fileIndex + 1
@@ -454,7 +537,7 @@ for (filename in fileList) {
   comboList <- readListFromFile(filePath)
   
   exploreList <- list()
-  exploreList <- compileExploreListWithComboList(exploreList, comboList, dependentAttrib)
+  exploreList <- compileExploreListWithComboList(data, exploreList, comboList, dependentAttrib)
   
   bestFitList <- calculateBestfit(exploreList, maxItemCount)
   currentBestFits <- mergeBestFits(currentBestFits, bestFitList, maxItemCount)
