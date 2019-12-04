@@ -109,58 +109,6 @@ buildExploreList <- function(exploreList, bfFormula) {
   return (exploreList)
 }
 
-
-# Execution
-data <- read.csv("http://staff.pubhealth.ku.dk/~tag/Teaching/share/data/Bodyfat.csv")
-# data <- read.csv("C:/temp/cpsc375proj1/Bodyfat.csv")
-
-data <- na.omit(data)
-
-# Plotting
-labelY <- "Abdomen Size"
-aesFunc <- function() aes(x=bodyfat, y=Abdomen)
-labelX <- "Body Fat"
-title <- paste("Scatterplot of ", labelY, " on ", labelX)
-ggplotFunc(aesFunc = aesFunc, labelX, labelY, title)
-
-labelY <- "Weight"
-aesFunc <- function() aes(x=bodyfat, y=Weight)
-labelX <- "Body Fat"
-title <- paste("Scatterplot of ", labelY, " on ", labelX)
-ggplotFunc(aesFunc = aesFunc, labelX, labelY, title)
-
-labelY <- "Hip"
-aesFunc <- function() aes(x=bodyfat, y=Hip)
-labelX <- "Body Fat"
-title <- paste("Scatterplot of ", labelY, " on ", labelX)
-ggplotFunc(aesFunc = aesFunc, labelX, labelY, title)
-
-labelY <- "Chest"
-aesFunc <- function() aes(x=bodyfat, y=Chest)
-labelX <- "Body Fat"
-title <- paste("Scatterplot of ", labelY, " on ", labelX)
-ggplotFunc(aesFunc = aesFunc, labelX, labelY, title)
-
-labelY <- "Thigh"
-aesFunc <- function() aes(x=bodyfat, y=Thigh)
-labelX <- "Body Fat"
-title <- paste("Scatterplot of ", labelY, " on ", labelX)
-ggplotFunc(aesFunc = aesFunc, labelX, labelY, title)
-
-
-labelY <- "Age"
-aesFunc <- function() aes(x=bodyfat, y=Age)
-labelX <- "Body Fat"
-title <- paste("Scatterplot of ", labelY, " on ", labelX)
-ggplotFunc(aesFunc = aesFunc, labelX, labelY, title)
-
-
-labelY <- "Density"
-aesFunc <- function() aes(x=bodyfat, y=Density)
-labelX <- "Body Fat"
-title <- paste("Scatterplot of ", labelY, " on ", labelX)
-ggplotFunc(aesFunc = aesFunc, labelX, labelY, title)
-
 # Formulation
 
 # iVars <- getIndependentVars(cols, dependentAttrib, excludes)
@@ -225,7 +173,7 @@ compileExploreListWithComboList <- function(exploreList, comboList, dependentAtt
 calculateBestfit <- function(exploreList, maxItemsCount) {
   
   maxValueList <-vector(mode="numeric", length=maxItemsCount)
-
+  
   maxItemList <- list()
   maxItemList[[1]] <- exploreList[[1]]
   maxValueList[1] <- exploreList[[1]][[3]]["adj.r.squared"]
@@ -254,6 +202,17 @@ calculateBestfit <- function(exploreList, maxItemsCount) {
   }
   
   return (maxItemList)
+}
+
+mergeBestFits <- function(currentBestFits, bestFits, maxItemCount) {
+  
+  for (bestFit in bestFits) {
+    currentBestFits[[length(currentBestFits)+1]] <- bestFit
+  }
+  
+  currentBestFits <- calculateBestfit(currentBestFits, maxItemCount)
+  
+  return (currentBestFits)
 }
 
 parseFormulaRecursive <- function (ideList, indepLanguage) {
@@ -333,6 +292,125 @@ generateBestFitEquations <- function(bestFitList) {
   return (eqnList)
 }
 
+writeListToFile <- function(listObj, workDir, filename, fileIndex, ext) {
+  
+  listObjVector <- c()
+  
+  for (i in 1:length(listObj)) {
+    listObjVector[i] <- paste(listObj[[i]], collapse = ",")
+  }
+  
+  filePath <- paste(workDir, filename, ".", fileIndex, ext, sep = "")
+  writeLines(listObjVector, filePath)
+  
+}
+
+readListFromFile <- function(filePath) {
+  
+  listObj <- list()
+  
+  con <- file(filePath, "r")
+  listObjVector <- readLines(con)
+  close(con)
+  
+  for (i in 1:length(listObjVector)) {
+    listObj[[length(listObj)+1]] <- unlist(strsplit(listObjVector[i], split=","))
+  }
+  
+  return (listObj)
+}
+
+comboNChooseKAllv2 <- function(inputList, k, chunkSize, workDir, filename, ext) {
+  
+  comboListAll <- list()
+  iLength <- length(inputList)
+  
+  if (k <= 0) {
+    k = iLength
+  }
+  
+  fileIndex <- 0
+  i <- 1
+  while (i<=k) {   
+    
+    comboList <- comboNChooseK(inputList, i)
+    comboListAll <- do.call(c, list(comboListAll, comboList))
+    
+    if (length(comboListAll) >= chunkSize) {
+      
+      writeListToFile(comboListAll, workDir, filename, fileIndex, ext)
+      
+      comboListAll <- list()
+      
+      fileIndex <- fileIndex + 1
+    }
+    i <- i + 1
+  }
+  
+  if (length(comboListAll) > 0) {
+    
+    writeListToFile(comboListAll, workDir, filename, fileIndex, ext)
+    
+    comboListAll <- list()
+    
+    fileIndex <- fileIndex + 1
+  }
+  
+}
+
+
+# Execution
+data <- read.csv("http://staff.pubhealth.ku.dk/~tag/Teaching/share/data/Bodyfat.csv")
+# data <- read.csv("C:/temp/cpsc375proj1/Bodyfat.csv")
+
+data <- na.omit(data)
+
+# Plotting
+labelY <- "Abdomen Size"
+aesFunc <- function() aes(x=bodyfat, y=Abdomen)
+labelX <- "Body Fat"
+title <- paste("Scatterplot of ", labelY, " on ", labelX)
+ggplotFunc(aesFunc = aesFunc, labelX, labelY, title)
+
+labelY <- "Weight"
+aesFunc <- function() aes(x=bodyfat, y=Weight)
+labelX <- "Body Fat"
+title <- paste("Scatterplot of ", labelY, " on ", labelX)
+ggplotFunc(aesFunc = aesFunc, labelX, labelY, title)
+
+labelY <- "Hip"
+aesFunc <- function() aes(x=bodyfat, y=Hip)
+labelX <- "Body Fat"
+title <- paste("Scatterplot of ", labelY, " on ", labelX)
+ggplotFunc(aesFunc = aesFunc, labelX, labelY, title)
+
+labelY <- "Chest"
+aesFunc <- function() aes(x=bodyfat, y=Chest)
+labelX <- "Body Fat"
+title <- paste("Scatterplot of ", labelY, " on ", labelX)
+ggplotFunc(aesFunc = aesFunc, labelX, labelY, title)
+
+labelY <- "Thigh"
+aesFunc <- function() aes(x=bodyfat, y=Thigh)
+labelX <- "Body Fat"
+title <- paste("Scatterplot of ", labelY, " on ", labelX)
+ggplotFunc(aesFunc = aesFunc, labelX, labelY, title)
+
+
+labelY <- "Age"
+aesFunc <- function() aes(x=bodyfat, y=Age)
+labelX <- "Body Fat"
+title <- paste("Scatterplot of ", labelY, " on ", labelX)
+ggplotFunc(aesFunc = aesFunc, labelX, labelY, title)
+
+
+labelY <- "Density"
+aesFunc <- function() aes(x=bodyfat, y=Density)
+labelX <- "Body Fat"
+title <- paste("Scatterplot of ", labelY, " on ", labelX)
+ggplotFunc(aesFunc = aesFunc, labelX, labelY, title)
+
+
 dependentAttrib = "bodyfat"
 excludes = c("Density")
 
@@ -340,12 +418,19 @@ excludes = c("Density")
 # funcNameList <- c("log", "exp", "sqrt", "log10", "floor", "ceiling", "sin", "cos", "tan")
 # postscriptOpNameList <- c("^2", "^3")
 
-k <- 2
+
+k <- 4
 funcNameList <- c("log", "sin")
 postscriptOpNameList <- c("^2")
 maxItemCount <- 3
 
-exploreList <- list()
+doGenerateCombo <- TRUE
+chunkSize <- 10000
+workDir <- "C:/temp/cpsc375proj1/work/"
+filename <- "comboList"
+ext <- ".csv"
+
+
 cols = colnames(data)
 iVars <- getIndependentVars(cols, dependentAttrib, excludes)
 allIVars <-iVars
@@ -353,18 +438,39 @@ allIVars <-iVars
 allIVars <- buildInFuncs(allIVars, iVars, funcNameList)
 allIVars <- buildInPostscriptOps(allIVars, iVars, postscriptOpNameList)
 
-comboList <- comboNChooseKAll(as.list(allIVars), k)
-
-exploreList <- compileExploreListWithComboList(exploreList, comboList, dependentAttrib)
-
-bestFitList <- calculateBestfit(exploreList, maxItemCount)
-
-for (i in bestFitList) {
-  
-  print(i[[3]]["adj.r.squared"])
+if (doGenerateCombo) {
+  comboNChooseKAllv2(as.list(allIVars), k, chunkSize, workDir, filename, ext)
 }
 
-generateBestFitEquations(bestFitList)
+# comboList <- comboNChooseKAll(as.list(allIVars), k)
+
+fileList <- list.files(workDir)
+
+currentBestFits <- list()
+
+for (filename in fileList) {
+
+  filePath <- paste(workDir, filename, sep = "")
+  comboList <- readListFromFile(filePath)
+  
+  exploreList <- list()
+  exploreList <- compileExploreListWithComboList(exploreList, comboList, dependentAttrib)
+  
+  bestFitList <- calculateBestfit(exploreList, maxItemCount)
+  currentBestFits <- mergeBestFits(currentBestFits, bestFitList, maxItemCount)
+  
+  comboList <- list()
+  exploreList <- list()
+}
+
+eqnList <- generateBestFitEquations(currentBestFits)
+
+for (i in 1:length(currentBestFits)) {
+  
+  print(eqnList[i])
+  print(currentBestFits[[i]][[3]]["adj.r.squared"])
+}
+
 
 
 
