@@ -529,7 +529,7 @@ excludes = c("Density")
 # postscriptOpNameList <- c("^2", "^3")
 
 
-k <- 4
+k <- 2
 funcNameList <- c("log", "sin")
 postscriptOpNameList <- c("^2")
 maxItemCount <- 3
@@ -549,6 +549,7 @@ allIVars <- buildInFuncs(allIVars, iVars, funcNameList)
 allIVars <- buildInPostscriptOps(allIVars, iVars, postscriptOpNameList)
 
 if (doGenerateCombo) {
+  unlink(paste(workDir, "*.*", sep = ""), recursive = FALSE)
   pclInfo <- initializeProcessComboListInfo(chunkSize, workDir, filename, ext)
   comboNChooseKAllv3(as.list(allIVars), k, processComboListFunc, pclInfo)
 }
