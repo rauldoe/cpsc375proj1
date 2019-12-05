@@ -370,7 +370,7 @@ initializeProcessComboListInfo <- function(chunkSize, workDir, filename, ext) {
   return (pclInfo)
 }
 
-processComboListFunc <- function(inputList, n, k, buildList, buildIndex, start, end, comboList, pclInfo, isTailData = False) {
+processComboListFunc <- function(inputList, n, k, buildList, buildIndex, start, end, comboList, pclInfo, isTailData = FALSE) {
 
   chunkSize <- pclInfo[["chunksize"]]
   workDir <- pclInfo[["workdir"]]
@@ -378,7 +378,7 @@ processComboListFunc <- function(inputList, n, k, buildList, buildIndex, start, 
   fileIndex <- pclInfo[["fileindex"]]
   ext <- pclInfo[["ext"]]
 
-  if (length(comboList) >= chunkSize) {
+  if (isTailData || (length(comboList) >= chunkSize)) {
     
     writeListToFile(comboListAll, workDir, filename, fileIndex, ext)
     comboListAll <- list()
@@ -386,8 +386,9 @@ processComboListFunc <- function(inputList, n, k, buildList, buildIndex, start, 
     pclInfo[["fileindex"]] <- fileIndex + 1
   }
 
-  
-  return (comboList)
+  retVal <- list(comboList, pclInfo)
+  names(retVal) <- c("combolist", "pclinfo")
+  return (retVal)
 }
 
 comboNChooseKRecursiveV3 <- function(inputList, n, k, buildList, buildIndex, start, end, comboList, processComboListFunc, pclInfo) {
@@ -397,7 +398,9 @@ comboNChooseKRecursiveV3 <- function(inputList, n, k, buildList, buildIndex, sta
     cLength <- length(comboList) + 1
     comboList[[cLength]] <- buildList
     # print(paste("add to comboList", paste(buildList, collapse=","), sep = " "))
-    comboList <- processComboListFunc(inputList, n, k, buildList, buildIndex, start, end, comboList, pclInfo)
+    retVal <- processComboListFunc(inputList, n, k, buildList, buildIndex, start, end, comboList, pclInfo)
+    comboList <- retVal[["combolist"]]
+    pclInfo <- reVal[["pclinfo"]]
   }
   else {
     
@@ -410,7 +413,9 @@ comboNChooseKRecursiveV3 <- function(inputList, n, k, buildList, buildIndex, sta
       newBuildIndex <- buildIndex + 1
       
       # print(paste("recurse buildIndex:", buildIndex, "i:", i, "end:", end, "newBuildIndex:", newBuildIndex, "newIndex:", newIndex, "b:", paste(buildList, collapse=","), sep= " "))
-      comboList <- comboNChooseKRecursiveV3S(inputList, n, k, buildList, newBuildIndex, newIndex, end, comboList, processComboListFunc, pclInfo)
+      retVal <- comboNChooseKRecursiveV3S(inputList, n, k, buildList, newBuildIndex, newIndex, end, comboList, processComboListFunc, pclInfo)
+      comboList <- retVal[["combolist"]]
+      pclInfo <- reVal[["pclinfo"]]
       # print(paste("return from recurse comboList buildIndex:", buildIndex, "i:", i, "end:", end, "newBuildIndex:", newBuildIndex, "newIndex:", newIndex, sep= " "))
       
       i <- i + 1
@@ -420,7 +425,9 @@ comboNChooseKRecursiveV3 <- function(inputList, n, k, buildList, buildIndex, sta
   }
   # if (buildIndex > k) {
   
-  return (comboList)
+  retVal <- list(comboList, pclInfo)
+  names(retVal) <- c("combolist", "pclinfo")
+  return (retVal)
 }
 
 comboNChooseKv3 <- function(inputList, k, processComboListFunc, pclInfo) {
@@ -430,47 +437,35 @@ comboNChooseKv3 <- function(inputList, k, processComboListFunc, pclInfo) {
   start <- 1
   end <- n
   comboList <- list()
-  comboList <- comboNChooseKRecursiveV3(inputList, n, k, buildList, buildIndex1, start, end, comboList, processComboListFunc, pclInfo)
+  retVal <- comboNChooseKRecursiveV3(inputList, n, k, buildList, buildIndex1, start, end, comboList, processComboListFunc, pclInfo)
+  comboList <- retVal[["combolist"]]
+  pclInfo <- reVal[["pclinfo"]]
   
-  return (comboList)
+  retVal <- processComboListFunc(inputList, n, k, buildList, buildIndex, start, end, comboList, pclInfo, TRUE)
+  return (retVal)
 }
 
 comboNChooseKAllv3 <- function(inputList, k, processComboListFunc, pclInfo) {
   
   comboListAll <- list()
-  iLength <- length(inputList)
+  fileIndex <- 0
   
   if (k <= 0) {
-    k = iLength
+    k <- length(inputList)
   }
   
-  fileIndex <- 0
   i <- 1
   while (i<=k) {   
     
-    comboList <- comboNChooseKV3(inputList, i, processComboListFunc, pclInfo)
+    retVal <- comboNChooseKV3(inputList, i, processComboListFunc, pclInfo)
+    comboList <- retVal[["combolist"]]
+    pclInfo <- reVal[["pclinfo"]]
+
     comboListAll <- do.call(c, list(comboListAll, comboList))
     comboList <- list()
 
-    if (length(comboListAll) >= chunkSize) {
-      
-      writeListToFile(comboListAll, workDir, filename, fileIndex, ext)
-      comboListAll <- list()
-      
-      fileIndex <- fileIndex + 1
-    }
     i <- i + 1
   }
-  
-  if (length(comboListAll) > 0) {
-    
-    writeListToFile(comboListAll, workDir, filename, fileIndex, ext)
-    
-    comboListAll <- list()
-    
-    fileIndex <- fileIndex + 1
-  }
-  
 }
 
 
@@ -540,7 +535,7 @@ postscriptOpNameList <- c("^2")
 maxItemCount <- 3
 
 doGenerateCombo <- TRUE
-chunkSize <- 10000
+chunkSize <- 7000
 workDir <- "C:/temp/cpsc375proj1/work/"
 filename <- "comboList"
 ext <- ".csv"
@@ -554,7 +549,8 @@ allIVars <- buildInFuncs(allIVars, iVars, funcNameList)
 allIVars <- buildInPostscriptOps(allIVars, iVars, postscriptOpNameList)
 
 if (doGenerateCombo) {
-  comboNChooseKAllv2(as.list(allIVars), k, chunkSize, workDir, filename, ext)
+  pclInfo <- initializeProcessComboListInfo(chunkSize, workDir, filename, ext)
+  comboNChooseKAllv2(as.list(allIVars), k, chunkSize, workDir, filename, ext, pclInfo)
 }
 
 # comboList <- comboNChooseKAll(as.list(allIVars), k)
