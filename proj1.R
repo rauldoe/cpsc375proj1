@@ -183,22 +183,32 @@ calculateBestfit <- function(exploreList, maxItemsCount) {
     maxValueList[i] <- exploreList[[1]][[3]]["adj.r.squared"]
   }
   
-  for(ex in exploreList) {
-    rsquared = as.numeric(ex[[3]]["r.squared"])
-    rsquaredadj = as.numeric(ex[[3]]["adj.r.squared"])
-    # print(i[[3]]["adj.r.squared"])
-    
-    for (index in 1:length(maxValueList))
-    {
-      if (rsquaredadj > maxValueList[index]) {
-        form <- paste(ex[[1]], collapse = " ")
-        print(paste("max", form, rsquaredadj))
-        maxValueList[index] <- rsquaredadj
-        
-        maxItemList[[index]] <- ex
-        break
+  if (length(exploreList) <= maxItemsCount) {
+    for (i in 1:maxItemCount) {
+      exploreItem = exploreList[[1]] 
+      maxItemList[[i]] <- exploreList[[1]]
+      maxValueList[i] <- exploreList[[1]][[3]]["adj.r.squared"]
+    }
+  }
+  else {
+    for(ex in exploreList) {
+      rsquared = as.numeric(ex[[3]]["r.squared"])
+      rsquaredadj = as.numeric(ex[[3]]["adj.r.squared"])
+      # print(i[[3]]["adj.r.squared"])
+      
+      for (index in 1:length(maxValueList))
+      {
+        if (rsquaredadj > maxValueList[index]) {
+          form <- paste(ex[[1]], collapse = " ")
+          print(paste("max", form, rsquaredadj))
+          maxValueList[index] <- rsquaredadj
+          
+          maxItemList[[index]] <- ex
+          break
+        }
       }
     }
+    # for(ex in exploreList) {
   }
   
   return (maxItemList)
@@ -535,7 +545,7 @@ postscriptOpNameList <- c("^2")
 maxItemCount <- 3
 
 doGenerateCombo <- TRUE
-chunkSize <- 1000
+chunkSize <- 10
 workDir <- "C:/temp/cpsc375proj1/work/"
 filename <- "comboList"
 ext <- ".csv"
