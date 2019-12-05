@@ -529,13 +529,13 @@ excludes = c("Density")
 # postscriptOpNameList <- c("^2", "^3")
 
 
-k <- 4
+k <- 2
 funcNameList <- c("log", "sin")
 postscriptOpNameList <- c("^2")
 maxItemCount <- 3
 
 doGenerateCombo <- TRUE
-chunkSize <- 7000
+chunkSize <- 1000
 workDir <- "C:/temp/cpsc375proj1/work/"
 filename <- "comboList"
 ext <- ".csv"
