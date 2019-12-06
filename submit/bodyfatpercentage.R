@@ -5,3 +5,5 @@ bodyfatpercentage <- function(Age, Weight, Height, Neck, Chest, Abdomen, Hip, Th
   
   return (bodyfat)
 }
+
+# bodyfatpercentage(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13)
