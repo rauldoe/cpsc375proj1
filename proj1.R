@@ -531,15 +531,15 @@ ggplotFunc(aesFunc = aesFunc, labelX, labelY, title)
 dependentAttrib = "bodyfat"
 excludes = c("Density")
 
+k <- 5
+funcNameList <- c("log", "exp", "sqrt", "log10", "floor", "ceiling", "sin", "cos", "tan")
+postscriptOpNameList <- c("^2", "^3")
+
+
 # k <- 3
-# funcNameList <- c("log", "exp", "sqrt", "log10", "floor", "ceiling", "sin", "cos", "tan")
-# postscriptOpNameList <- c("^2", "^3")
-
-
-k <- 3
-funcNameList <- c("log", "sin")
-postscriptOpNameList <- c("^2")
-maxItemCount <- 5
+# funcNameList <- c("log", "sin")
+# postscriptOpNameList <- c("^2")
+# maxItemCount <- 5
 
 doGenerateCombo <- TRUE
 chunkSize <- 3000
