@@ -173,62 +173,41 @@ compileExploreListWithComboList <- function(data, exploreList, comboList, depend
 calculateBestfit <- function(exploreList, maxItemsCount) {
   
   maxItemList <- list()
-  
-  if (length(exploreList) <= maxItemsCount) {
-    
-    maxItemList[[1]] <- exploreList[[1]]
-    
-    for (i in 2:maxItemCount) {
-      
-      prev = maxItemList[[i-1]]
-      prevValue = prev["adj.r.squared"]
-      cur = exploreList[[i]]
-      curValue = cur["adj.r.squared"]
-      
-      if (curValue > prevValue)
-      {
-        maxItemList[[i-1]] <- cur
-        maxItemList[[length(maxItemList)+1]] <- prev
-      }
-      else {
-        maxItemList[[length(maxItemList)+1]] <- cur
-      }
-    }
-    # for (i in 2:maxItemCount) {
-  }
-  else {
 
-    maxValueList <-vector(mode="numeric", length=maxItemsCount)
+  for (i in 1:length(exploreList)) {
     
+    cur <- exploreList[[i]]
+    curValue <- cur[[3]]["adj.r.squared"][[1]]
     
-    maxItemList[[1]] <- exploreList[[1]]
-    maxValueList[1] <- exploreList[[1]][[3]]["adj.r.squared"]
-    
-    for (i in 2:maxItemCount) {
-      maxItemList[[length(maxItemList)+1]] <- exploreList[[1]]
-      maxValueList[i] <- exploreList[[1]][[3]]["adj.r.squared"]
+    if (length(maxItemList) <= 0) {
+      maxItemList[[length(maxItemList)+1]] <- cur
     }
-    
-    for(ex in exploreList) {
-      rsquared = as.numeric(ex[[3]]["r.squared"])
-      rsquaredadj = as.numeric(ex[[3]]["adj.r.squared"])
-      # print(i[[3]]["adj.r.squared"])
-      
-      for (index in 1:length(maxValueList))
-      {
-        if (rsquaredadj > maxValueList[index]) {
-          form <- paste(ex[[1]], collapse = " ")
-          print(paste("max", form, rsquaredadj))
-          maxValueList[index] <- rsquaredadj
+    else {
+      for (j in 1:maxItemsCount) {
+        
+        if (j<=length(maxItemList)) {
+          itemToCompare <- maxItemList[[j]]
+          itemToCompareValue <- itemToCompare[[3]]["adj.r.squared"][[1]]
           
-          maxItemList[[index]] <- ex
+          if (curValue > itemToCompareValue) {
+            maxItemList[[j]] <- cur
+            if (j+1<=maxItemsCount) {
+              maxItemList[[j+1]] <- itemToCompare
+              j <- j+1
+            }
+            break
+          }
+          # if (curValue > itemToCompareValue)            
+        }
+        else {
+          maxItemList[[j]] <- cur
           break
         }
       }
     }
-    # for(ex in exploreList) {
   }
-  
+  # for (i in 1:length(exploreList))
+
   return (maxItemList)
 }
 
@@ -557,13 +536,13 @@ excludes = c("Density")
 # postscriptOpNameList <- c("^2", "^3")
 
 
-k <- 2
+k <- 3
 funcNameList <- c("log", "sin")
 postscriptOpNameList <- c("^2")
-maxItemCount <- 3
+maxItemCount <- 5
 
 doGenerateCombo <- TRUE
-chunkSize <- 10
+chunkSize <- 3000
 workDir <- "C:/temp/cpsc375proj1/work/"
 filename <- "comboList"
 ext <- ".csv"
