@@ -172,25 +172,43 @@ compileExploreListWithComboList <- function(data, exploreList, comboList, depend
 
 calculateBestfit <- function(exploreList, maxItemsCount) {
   
-  maxValueList <-vector(mode="numeric", length=maxItemsCount)
-  
   maxItemList <- list()
-  maxItemList[[1]] <- exploreList[[1]]
-  maxValueList[1] <- exploreList[[1]][[3]]["adj.r.squared"]
-  
-  for (i in 2:maxItemCount) {
-    maxItemList[[length(maxItemList)+1]] <- exploreList[[1]]
-    maxValueList[i] <- exploreList[[1]][[3]]["adj.r.squared"]
-  }
   
   if (length(exploreList) <= maxItemsCount) {
-    for (i in 1:maxItemCount) {
-      exploreItem = exploreList[[1]] 
-      maxItemList[[i]] <- exploreList[[1]]
-      maxValueList[i] <- exploreList[[1]][[3]]["adj.r.squared"]
+    
+    maxItemList[[1]] <- exploreList[[1]]
+    
+    for (i in 2:maxItemCount) {
+      
+      prev = maxItemList[[i-1]]
+      prevValue = prev["adj.r.squared"]
+      cur = exploreList[[i]]
+      curValue = cur["adj.r.squared"]
+      
+      if (curValue > prevValue)
+      {
+        maxItemList[[i-1]] <- cur
+        maxItemList[[length(maxItemList)+1]] <- prev
+      }
+      else {
+        maxItemList[[length(maxItemList)+1]] <- cur
+      }
     }
+    # for (i in 2:maxItemCount) {
   }
   else {
+
+    maxValueList <-vector(mode="numeric", length=maxItemsCount)
+    
+    
+    maxItemList[[1]] <- exploreList[[1]]
+    maxValueList[1] <- exploreList[[1]][[3]]["adj.r.squared"]
+    
+    for (i in 2:maxItemCount) {
+      maxItemList[[length(maxItemList)+1]] <- exploreList[[1]]
+      maxValueList[i] <- exploreList[[1]][[3]]["adj.r.squared"]
+    }
+    
     for(ex in exploreList) {
       rsquared = as.numeric(ex[[3]]["r.squared"])
       rsquaredadj = as.numeric(ex[[3]]["adj.r.squared"])
