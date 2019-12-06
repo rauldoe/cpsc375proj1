@@ -534,8 +534,8 @@ ggplotFunc(aesFunc = aesFunc, labelX, labelY, title)
 dependentAttrib = "bodyfat"
 excludes = c("Density")
 
-minK = 5
-k <- 5
+minK = 1
+k <- 3
 funcNameList <- c("log", "exp", "sqrt", "log10", "floor", "ceiling", "sin", "cos", "tan")
 postscriptOpNameList <- c("^2", "^3")
 
